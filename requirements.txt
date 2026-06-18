@@ -1,0 +1,179 @@
+# Retail Inventory Demand Prediction with Neural Networks
+
+## Project Overview
+
+This project was completed for **Machine Learning and Programming II – Assignment 1**. The goal is to use a Neural Network model to support supply-chain decision-making in the **warehousing** field.
+
+The selected business problem is **automatic stock allocation and reducing supply inefficiencies**. The model predicts daily product demand, represented by `Units Sold`, so that retail warehouse managers can allocate inventory more effectively across stores and products.
+
+## Dataset
+
+The project uses the **Retail Store Inventory Forecasting Dataset** from Kaggle.
+
+Original dataset used in this repository:
+
+```text
+data/raw/retail_store_inventory.csv
+```
+
+The dataset contains daily inventory and sales records with attributes such as:
+
+- Date
+- Store ID
+- Product ID
+- Category
+- Region
+- Inventory Level
+- Units Sold
+- Units Ordered
+- Demand Forecast
+- Price
+- Discount
+- Weather Condition
+- Holiday/Promotion
+- Competitor Pricing
+- Seasonality
+
+## Target Variable
+
+```text
+Units Sold
+```
+
+`Units Sold` is the numerical output variable predicted by the Neural Network.
+
+## Input Features
+
+The model uses inventory, pricing, forecast, promotion, weather, seasonality, product, store, and region-related features. The original `Date` column was transformed into date-based features such as month and day of week.
+
+`Units Ordered` was excluded because it represents a replenishment decision. The objective is to predict demand before deciding how much inventory to order or allocate.
+
+## Methodology
+
+The notebook follows these major steps:
+
+1. Load and inspect the raw dataset.
+2. Isolate five rows before model development for final testing.
+3. Check missing values, duplicates, data types, and unusual values.
+4. Clean negative values in `Demand Forecast` by replacing them with zero.
+5. Engineer date-based features.
+6. Separate predictors and target variable.
+7. Split the modeling data chronologically into 80% training and 20% testing.
+8. Scale numerical features using `MinMaxScaler`.
+9. Encode categorical features using `OneHotEncoder`.
+10. Scale the target variable to the 0–1 range.
+11. Train a Neural Network regression model using `MLPRegressor`.
+12. Evaluate the model using MAE, RMSE, and R².
+13. Apply the trained model to the five isolated rows and compare predictions with actual values.
+
+## Neural Network Model
+
+The algorithm used is:
+
+```text
+Multi-Layer Perceptron Regressor (MLPRegressor)
+```
+
+Model architecture:
+
+| Layer | Nodes |
+|---|---:|
+| Input layer | 67 processed input features |
+| Hidden layer | 46 nodes |
+| Output layer | 1 node |
+
+The hidden layer size was selected using the guideline:
+
+```text
+(2/3 × number of input nodes) + number of output nodes
+(2/3 × 67) + 1 ≈ 46
+```
+
+## Model Results
+
+Regular 20% testing dataset results:
+
+| Metric | Result |
+|---|---:|
+| MAE | 7.73 units |
+| RMSE | 9.05 units |
+| R² Score | 0.9930 |
+
+The Neural Network completed training after **35 iterations** with a final training loss of approximately **0.000182**.
+
+## Five Isolated Row Testing
+
+Five rows were removed before preprocessing and model training. These rows were used only after the model was trained.
+
+| Store | Product | Actual Units Sold | Predicted Units Sold | Absolute Error |
+|---|---|---:|---:|---:|
+| S005 | P0004 | 85 | 78.27 | 6.73 |
+| S003 | P0014 | 74 | 80.55 | 6.55 |
+| S004 | P0011 | 107 | 117.17 | 10.17 |
+| S003 | P0006 | 366 | 364.81 | 1.19 |
+| S003 | P0005 | 291 | 293.10 | 2.10 |
+
+Average absolute error for the isolated rows:
+
+```text
+5.35 units
+```
+
+## Business Impact
+
+The model supports warehouse stock allocation by estimating product demand more accurately. These predictions can help reduce stock shortages, avoid excess inventory, lower storage and replenishment costs, and improve customer satisfaction through better product availability.
+
+The `Demand Forecast` variable was included because it represents an existing estimate that may be available before the stock-allocation decision. The Neural Network improves this estimate by combining it with inventory, pricing, promotion, seasonal, store, and product-related information.
+
+## Repository Structure
+
+```text
+retail-inventory-nn-assignment/
+│
+├── README.md
+├── requirements.txt
+├── .gitignore
+│
+├── data/
+│   ├── raw/
+│   │   └── retail_store_inventory.csv
+│   └── processed/
+│       ├── cleaned_modeling_dataset.csv
+│       └── isolated_5_rows.csv
+│
+├── notebooks/
+│   └── Assignment_1.ipynb
+│
+├── outputs/
+│   └── isolated_5_rows_prediction_results.csv
+│
+└── reports/
+    └── Assignment_1_Report.docx
+```
+
+## How to Run
+
+1. Clone or download this repository.
+2. Install the required libraries:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Open the notebook:
+
+```text
+notebooks/Assignment_1.ipynb
+```
+
+4. Run the notebook cells from top to bottom.
+
+## Main Libraries
+
+- pandas
+- numpy
+- matplotlib
+- scikit-learn
+- openpyxl
+- jupyter
+
