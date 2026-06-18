@@ -255,5 +255,4 @@ The project uses:
 ## Author
 
 Said Huner
-Machine Learning and Programming II
-Summer 2026
+
