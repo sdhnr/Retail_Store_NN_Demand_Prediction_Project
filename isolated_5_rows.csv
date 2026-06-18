@@ -1,0 +1,6 @@
+Original_Row_Number,Date,Store ID,Product ID,Category,Region,Inventory Level,Units Sold,Units Ordered,Demand Forecast,Price,Discount,Weather Condition,Holiday/Promotion,Competitor Pricing,Seasonality
+73085,2024-01-01,S005,P0004,Toys,North,158,85,193,85.16,77.29,10,Cloudy,1,73.66,Autumn
+73055,2024-01-01,S003,P0014,Electronics,West,230,74,190,85.49,73.4,20,Cloudy,1,72.65,Spring
+73072,2024-01-01,S004,P0011,Groceries,East,155,107,47,123.65,88.17,20,Snowy,1,90.26,Autumn
+73047,2024-01-01,S003,P0006,Furniture,North,451,366,200,372.01,24.39,0,Sunny,0,28.31,Winter
+73046,2024-01-01,S003,P0005,Electronics,West,411,291,200,298.09,82.16,20,Sunny,1,79.32,Summer
