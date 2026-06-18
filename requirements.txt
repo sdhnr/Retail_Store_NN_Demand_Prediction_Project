@@ -1,179 +1,346 @@
-# Retail Inventory Demand Prediction with Neural Networks
+# Project Steps: Retail Inventory Neural Network Model
 
-## Project Overview
+This document explains the full notebook workflow used to build the Neural Network model for predicting daily `Units Sold`.
 
-This project was completed for **Machine Learning and Programming II – Assignment 1**. The goal is to use a Neural Network model to support supply-chain decision-making in the **warehousing** field.
+## Step 1: Import Libraries
 
-The selected business problem is **automatic stock allocation and reducing supply inefficiencies**. The model predicts daily product demand, represented by `Units Sold`, so that retail warehouse managers can allocate inventory more effectively across stores and products.
+The notebook begins by importing the required Python libraries.
 
-## Dataset
+Main libraries used:
 
-The project uses the **Retail Store Inventory Forecasting Dataset** from Kaggle.
+* `pandas` for loading and preparing the dataset
+* `numpy` for numerical operations
+* `matplotlib` for visualization
+* `train_test_split` tools and preprocessing tools from scikit-learn
+* `MinMaxScaler` for scaling numerical variables
+* `OneHotEncoder` for categorical encoding
+* `ColumnTransformer` for applying different transformations to different columns
+* `MLPRegressor` for building the Neural Network regression model
+* `mean_absolute_error`, `mean_squared_error`, and `r2_score` for model evaluation
 
-Original dataset used in this repository:
+## Step 2: Load the Dataset
+
+The raw dataset was loaded from:
 
 ```text
-data/raw/retail_store_inventory.csv
+retail_store_inventory.csv
 ```
 
-The dataset contains daily inventory and sales records with attributes such as:
+The dataset contains daily inventory and sales records for retail stores and products.
 
-- Date
-- Store ID
-- Product ID
-- Category
-- Region
-- Inventory Level
-- Units Sold
-- Units Ordered
-- Demand Forecast
-- Price
-- Discount
-- Weather Condition
-- Holiday/Promotion
-- Competitor Pricing
-- Seasonality
+A copy of the raw dataset was created so that the original data remained unchanged.
 
-## Target Variable
+## Step 3: Convert the Date Column
+
+The `Date` column was converted into datetime format.
+
+This allowed the project to extract useful time-related features later in the notebook.
+
+## Step 4: Isolate Five Rows for Final Testing
+
+Five observations were removed from the dataset before preprocessing and model training.
+
+These five rows were saved separately as:
+
+```text
+isolated_5_rows.csv
+```
+
+The purpose of isolating these rows was to create a final test set that the model had never seen during training or regular testing.
+
+The isolated rows were not used during:
+
+* preprocessing fitting
+* scaling
+* encoding
+* train-test splitting
+* Neural Network training
+* regular model evaluation
+
+This step was required by the assignment.
+
+## Step 5: Inspect the Modeling Dataset
+
+After removing the five isolated rows, the remaining dataset was inspected.
+
+The inspection included:
+
+* dataset shape
+* column names
+* data types
+* missing values
+* duplicate rows
+* summary statistics
+* negative-value checks
+* categorical-value checks
+
+The dataset had no missing values and no duplicate rows.
+
+## Step 6: Clean Negative Demand Forecast Values
+
+The inspection showed that the `Demand Forecast` column contained negative values.
+
+Negative demand forecasts are not meaningful for inventory planning, so they were replaced with zero using a fixed business rule.
+
+The target variable, `Units Sold`, was not modified.
+
+## Step 7: Feature Engineering
+
+The raw `Date` column was converted into useful time-based features:
+
+* `Date_Year`
+* `Date_Month`
+* `Date_DayOfWeek`
+
+The original `Date` column was then removed.
+
+The `Units Ordered` column was also removed from the first model because it represents a replenishment decision. The goal of the model is to predict product demand before making stock-allocation and ordering decisions.
+
+## Step 8: Select Target and Predictors
+
+The target variable was:
 
 ```text
 Units Sold
 ```
 
-`Units Sold` is the numerical output variable predicted by the Neural Network.
+This is the numerical value the model tries to predict.
 
-## Input Features
+The predictor variables included inventory, forecast, price, discount, holiday/promotion status, competitor pricing, product information, store information, region, weather, seasonality, and date-based features.
 
-The model uses inventory, pricing, forecast, promotion, weather, seasonality, product, store, and region-related features. The original `Date` column was transformed into date-based features such as month and day of week.
+## Step 9: Identify Numerical and Categorical Features
 
-`Units Ordered` was excluded because it represents a replenishment decision. The objective is to predict demand before deciding how much inventory to order or allocate.
+The model used two groups of input variables.
 
-## Methodology
+### Numerical Features
 
-The notebook follows these major steps:
+* `Inventory Level`
+* `Demand Forecast`
+* `Price`
+* `Discount`
+* `Holiday/Promotion`
+* `Competitor Pricing`
 
-1. Load and inspect the raw dataset.
-2. Isolate five rows before model development for final testing.
-3. Check missing values, duplicates, data types, and unusual values.
-4. Clean negative values in `Demand Forecast` by replacing them with zero.
-5. Engineer date-based features.
-6. Separate predictors and target variable.
-7. Split the modeling data chronologically into 80% training and 20% testing.
-8. Scale numerical features using `MinMaxScaler`.
-9. Encode categorical features using `OneHotEncoder`.
-10. Scale the target variable to the 0–1 range.
-11. Train a Neural Network regression model using `MLPRegressor`.
-12. Evaluate the model using MAE, RMSE, and R².
-13. Apply the trained model to the five isolated rows and compare predictions with actual values.
+### Categorical Features
 
-## Neural Network Model
+* `Store ID`
+* `Product ID`
+* `Category`
+* `Region`
+* `Weather Condition`
+* `Seasonality`
+* `Date_Month`
+* `Date_DayOfWeek`
 
-The algorithm used is:
+## Step 10: Chronological Train-Test Split
 
-```text
-Multi-Layer Perceptron Regressor (MLPRegressor)
+The data was sorted by date and split chronologically.
+
+The earlier 80% of the data was used for training.
+
+The most recent 20% of the data was used for testing.
+
+A chronological split was selected because the business goal is to predict future-style product demand using historical information.
+
+The five isolated rows were not included in either the training or testing dataset.
+
+## Step 11: Preprocess Input Features
+
+The input variables were preprocessed using a `ColumnTransformer`.
+
+Numerical features were scaled to the 0–1 range using:
+
+```python
+MinMaxScaler()
 ```
 
-Model architecture:
+Categorical features were converted into dummy variables using:
 
-| Layer | Nodes |
-|---|---:|
-| Input layer | 67 processed input features |
-| Hidden layer | 46 nodes |
-| Output layer | 1 node |
+```python
+OneHotEncoder()
+```
+
+The preprocessing transformer was fitted only on the training data. This prevented information from the testing dataset from influencing model development.
+
+The fitted transformer was then applied to the testing data.
+
+After preprocessing, the model had:
+
+```text
+67 processed input features
+```
+
+## Step 12: Scale the Target Variable
+
+The target variable, `Units Sold`, was also scaled to the 0–1 range before training.
+
+A separate `MinMaxScaler` was used for the target variable.
+
+The scaler was fitted only on the training target values.
+
+After prediction, the model outputs were converted back into the original unit scale so the results could be interpreted as units sold.
+
+## Step 13: Build the Neural Network Model
+
+A `MLPRegressor` model was selected because the project predicts a numerical value.
+
+The model architecture was:
+
+| Layer        | Description           |
+| ------------ | --------------------- |
+| Input Layer  | 67 processed features |
+| Hidden Layer | 46 nodes              |
+| Output Layer | 1 node                |
 
 The hidden layer size was selected using the guideline:
 
 ```text
 (2/3 × number of input nodes) + number of output nodes
+```
+
+Calculation:
+
+```text
 (2/3 × 67) + 1 ≈ 46
 ```
 
-## Model Results
+The model used:
 
-Regular 20% testing dataset results:
+* one hidden layer
+* 46 hidden nodes
+* ReLU activation function
+* Adam optimizer
+* early stopping
 
-| Metric | Result |
-|---|---:|
-| MAE | 7.73 units |
-| RMSE | 9.05 units |
-| R² Score | 0.9930 |
+## Step 14: Train the Neural Network
 
-The Neural Network completed training after **35 iterations** with a final training loss of approximately **0.000182**.
+The Neural Network was trained using:
 
-## Five Isolated Row Testing
+* preprocessed training inputs
+* scaled training target values
 
-Five rows were removed before preprocessing and model training. These rows were used only after the model was trained.
+Early stopping was enabled. This allowed the model to stop training when improvement became very small.
+
+The model completed training after:
+
+```text
+35 iterations
+```
+
+The final training loss was approximately:
+
+```text
+0.000182
+```
+
+## Step 15: Plot the Training Loss Curve
+
+A loss curve was created to show how the model’s training loss changed over the training iterations.
+
+The curve decreased sharply at the beginning and then became almost flat. This showed that the model learned the main patterns quickly and then stopped improving significantly.
+
+## Step 16: Evaluate the Model on the Testing Dataset
+
+The trained model was evaluated using the regular 20% testing dataset.
+
+The testing records were not used during model training.
+
+The scaled predictions were converted back into the original `Units Sold` scale.
+
+The model was evaluated using:
+
+* Mean Absolute Error
+* Root Mean Squared Error
+* R² Score
+
+### Testing Results
+
+| Metric   |     Result |
+| -------- | ---------: |
+| MAE      | 7.73 units |
+| RMSE     | 9.05 units |
+| R² Score |     0.9930 |
+
+The MAE shows that the model’s predictions differed from the actual sales values by approximately 7.73 units on average.
+
+The R² score shows that the model explained approximately 99.3% of the variation in `Units Sold`.
+
+## Step 17: Test the Five Isolated Rows
+
+The five isolated rows were loaded from:
+
+```text
+isolated_5_rows.csv
+```
+
+Their actual `Units Sold` values were stored separately.
+
+The same feature-engineering rules were applied to the isolated rows.
+
+The target variable was removed before prediction.
+
+The already-fitted preprocessing transformer was applied using:
+
+```python
+preprocessor.transform()
+```
+
+The model then predicted `Units Sold` using:
+
+```python
+nn_model.predict()
+```
+
+The model was not fitted again on the isolated rows.
+
+## Step 18: Compare Isolated Predictions With Actual Values
+
+The model predictions were compared with the actual `Units Sold` values.
 
 | Store | Product | Actual Units Sold | Predicted Units Sold | Absolute Error |
-|---|---|---:|---:|---:|
-| S005 | P0004 | 85 | 78.27 | 6.73 |
-| S003 | P0014 | 74 | 80.55 | 6.55 |
-| S004 | P0011 | 107 | 117.17 | 10.17 |
-| S003 | P0006 | 366 | 364.81 | 1.19 |
-| S003 | P0005 | 291 | 293.10 | 2.10 |
+| ----- | ------- | ----------------: | -------------------: | -------------: |
+| S005  | P0004   |                85 |                78.27 |           6.73 |
+| S003  | P0014   |                74 |                80.55 |           6.55 |
+| S004  | P0011   |               107 |               117.17 |          10.17 |
+| S003  | P0006   |               366 |               364.81 |           1.19 |
+| S003  | P0005   |               291 |               293.10 |           2.10 |
 
-Average absolute error for the isolated rows:
+The average absolute error across the five isolated rows was:
 
 ```text
 5.35 units
 ```
 
-## Business Impact
+## Step 19: Interpret the Findings
 
-The model supports warehouse stock allocation by estimating product demand more accurately. These predictions can help reduce stock shortages, avoid excess inventory, lower storage and replenishment costs, and improve customer satisfaction through better product availability.
+The results showed that the Neural Network predicted daily units sold accurately.
 
-The `Demand Forecast` variable was included because it represents an existing estimate that may be available before the stock-allocation decision. The Neural Network improves this estimate by combining it with inventory, pricing, promotion, seasonal, store, and product-related information.
+The regular testing dataset produced an MAE of 7.73 units and an R² score of 0.9930.
 
-## Repository Structure
+The isolated five-row test produced an average absolute error of 5.35 units.
 
-```text
-retail-inventory-nn-assignment/
-│
-├── README.md
-├── requirements.txt
-├── .gitignore
-│
-├── data/
-│   ├── raw/
-│   │   └── retail_store_inventory.csv
-│   └── processed/
-│       ├── cleaned_modeling_dataset.csv
-│       └── isolated_5_rows.csv
-│
-├── notebooks/
-│   └── Assignment_1.ipynb
-│
-├── outputs/
-│   └── isolated_5_rows_prediction_results.csv
-│
-└── reports/
-    └── Assignment_1_Report.docx
-```
+These results suggest that the model can support automatic stock allocation by helping the business estimate product demand more accurately.
 
-## How to Run
+## Step 20: Business Impact
 
-1. Clone or download this repository.
-2. Install the required libraries:
+The model can support warehouse and supply chain decision-making by helping the company:
 
-```bash
-pip install -r requirements.txt
-```
+* allocate stock more accurately
+* reduce shortages
+* avoid excessive inventory
+* improve replenishment planning
+* reduce storage costs
+* improve product availability
+* make faster data-driven inventory decisions
 
-3. Open the notebook:
+The model is useful because it combines multiple business variables instead of relying on a single forecast or manual judgment.
 
-```text
-notebooks/Assignment_1.ipynb
-```
+## Final Summary
 
-4. Run the notebook cells from top to bottom.
+This project used a Neural Network regression model to predict `Units Sold` for retail products.
 
-## Main Libraries
+The model used 67 processed input features, one hidden layer with 46 nodes, and one output node.
 
-- pandas
-- numpy
-- matplotlib
-- scikit-learn
-- openpyxl
-- jupyter
+The model performed strongly on both the testing dataset and the five isolated rows.
 
+The final results show that Neural Networks can support supply chain analytics by improving demand prediction and stock-allocation decisions.
